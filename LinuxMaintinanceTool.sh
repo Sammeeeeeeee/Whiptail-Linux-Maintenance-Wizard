@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION="4.2"
+VERSION="4.3"
 SCRIPT_URL="https://raw.githubusercontent.com/Sammeeeeeeee/Whiptail-Linux-Maintenance-Wizard/main/LinuxMaintinanceTool.sh"
 SCRIPT_PATH="/usr/local/bin/lmt.sh"
 
