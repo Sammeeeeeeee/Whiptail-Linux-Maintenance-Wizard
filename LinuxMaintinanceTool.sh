@@ -1,5 +1,17 @@
 #!/bin/bash
 
+VERSION="1.0"
+
+# Check for newer version
+check_version() {
+    local github_version=$(curl -s https://raw.githubusercontent.com/Sammeeeeeeee/Whiptail-Linux-Maintenance-Wizard/main/LinuxMaintinanceTool.sh | grep '^VERSION=' | cut -d '"' -f 2)
+    if [ -n "$github_version" ] && [ "$github_version" != "$VERSION" ]; then
+        whiptail --title "Update Available" --msgbox "A new version ($github_version) is available. You are currently running version $VERSION.\nPlease update your script." 10 60
+    fi
+}
+
+check_version
+
 full_update() {
     timeout 300 apt update
     timeout 300 apt full-upgrade -y
