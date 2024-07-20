@@ -11,7 +11,6 @@ if ! command -v whiptail &> /dev/null; then
 
     case "$answer" in
         y|Y)
-            
             if command -v apt-get &> /dev/null; then
                 sudo apt-get update
                 sudo apt-get install -y whiptail
@@ -37,7 +36,6 @@ if ! command -v whiptail &> /dev/null; then
     esac
 fi
 
-
 if [ $? -ne 0 ]; then
     echo "User canceled the operation."
     exit 1
@@ -48,15 +46,21 @@ if [[ -z "$SELECTED_ALIAS" ]]; then
     exit 1
 fi
 
-ALIAS_COMMAND="alias $SELECTED_ALIAS='$SCRIPT_PATH'"
+DYNAMIC_LINK=$(whiptail --title "Choose Option" --menu "Select an option:" 12 120 2 \
+"Dynamic Link:" "Runs the version fresh off the GitHub repo every time. Unsecure, but always has the latest edition" \
+"Download:" "Download the latest version from the GitHub repo. Will not auto-update." 3>&1 1>&2 2>&3)
 
 {
     whiptail --title "Progress" --gauge "Downloading and setting up the script..." 10 60 0 &
     
-    wget -qO "$SCRIPT_PATH" "$SCRIPT_URL"
-    if [ $? -ne 0 ]; then
-        whiptail --title "Error" --msgbox "Failed to download the script. Please check your internet connection or the URL." 8 45
-        exit 1
+    if [[ "$DYNAMIC_LINK" == "1" ]]; then
+        echo 'bash -c "$(wget -qLO - https://github.com/Sammeeeeeeee/Whiptail-Linux-Maintenance-Wizard/raw/main/LinuxMaintinanceTool.sh)"' > "$SCRIPT_PATH"
+    else
+        wget -qO "$SCRIPT_PATH" "$SCRIPT_URL"
+        if [ $? -ne 0 ]; then
+            whiptail --title "Error" --msgbox "Failed to download the script. Please check your internet connection or the URL." 8 45
+            exit 1
+        fi
     fi
     
     chmod +x "$SCRIPT_PATH"
@@ -67,6 +71,8 @@ ALIAS_COMMAND="alias $SELECTED_ALIAS='$SCRIPT_PATH'"
 
     echo 100
 } | whiptail --title "Progress" --gauge "Setting up the script..." 10 60 0
+
+ALIAS_COMMAND="alias $SELECTED_ALIAS='$SCRIPT_PATH'"
 
 if [ -n "$ZSH_VERSION" ]; then
     SHELL_CONFIG="$HOME/.zshrc"
@@ -84,4 +90,4 @@ else
     whiptail --title "Success" --msgbox "Alias added to $SHELL_CONFIG" 8 45
 fi
 
-whiptail --title "Instructions" --msgbox "To apply the changes, run run exec bash or :\n\nsource $SHELL_CONFIG" 12 45
+whiptail --title "Instructions" --msgbox "To apply the changes, run exec bash or:\n\nsource $SHELL_CONFIG" 12 45
