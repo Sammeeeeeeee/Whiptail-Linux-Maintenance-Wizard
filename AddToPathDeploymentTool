@@ -87,9 +87,9 @@ DYNAMIC_LINK=$(whiptail --title "Choose Option" --menu "Select an option:" 12 12
     whiptail --title "Progress" --gauge "Downloading and setting up the script..." 10 60 0 &
     
     if [[ "$DYNAMIC_LINK" == "Dynamic Link:" ]]; then
-        echo 'bash -c "$(wget -qLO - https://github.com/Sammeeeeeeee/Whiptail-Linux-Maintenance-Wizard/raw/main/LinuxMaintinanceTool.sh)"' > "$SCRIPT_PATH"
+        sudo echo 'bash -c "$(wget -qLO - https://github.com/Sammeeeeeeee/Whiptail-Linux-Maintenance-Wizard/raw/main/LinuxMaintinanceTool.sh)"' > "$SCRIPT_PATH"
     else
-        wget -qO "$SCRIPT_PATH" "$SCRIPT_URL"
+        sudo wget -qO "$SCRIPT_PATH" "$SCRIPT_URL"
         if [ $? -ne 0 ]; then
             whiptail --title "Error" --msgbox "Failed to download the script. Please check your internet connection or the URL." 8 45
             exit 1
