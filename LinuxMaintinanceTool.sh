@@ -1,5 +1,5 @@
 #!/bin/bash
-# Function definitions
+
 full_update() {
     sudo apt update
     sudo apt full-upgrade -y
@@ -27,14 +27,12 @@ top_processes_average() {
     ps -eo pid,ppid,cmd,%mem,%cpu --sort=-%cpu | head -n 6
 }
 
-# Create a checklist dialog for Update options
 UPDATE_CHOICES=$(whiptail --title "Select Update Options" --separate-output --checklist \
 "Choose the update operations you want to perform:" 15 60 2 \
 "1" "Full System Update" OFF \
 "2" "Docker Update (Watchtower)" OFF \
 3>&1 1>&2 2>&3)
 
-# Create a checklist dialog for Information options
 INFO_CHOICES=$(whiptail --title "Select Information Options" --separate-output --checklist \
 "Choose the information operations you want to perform:" 20 60 4 \
 "1" "Disk Usage Check" OFF \
@@ -43,13 +41,11 @@ INFO_CHOICES=$(whiptail --title "Select Information Options" --separate-output -
 "4" "Top Processes Average" OFF \
 3>&1 1>&2 2>&3)
 
-# Check if the user pressed Cancel for both dialogs
 if [ $? -ne 0 ]; then
     whiptail --title "Cancelled" --msgbox "Operation cancelled." 10 60
     exit 1
 fi
 
-# Execute selected Update options and display output
 for choice in $UPDATE_CHOICES; do
     case $choice in
         "1")
@@ -63,7 +59,6 @@ for choice in $UPDATE_CHOICES; do
     esac
 done
 
-# Execute selected Information options and display output
 for choice in $INFO_CHOICES; do
     case $choice in
         "1")
