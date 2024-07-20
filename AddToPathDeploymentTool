@@ -5,6 +5,39 @@ SCRIPT_PATH="/usr/local/bin/lmt.sh"
 
 SELECTED_ALIAS=$(whiptail --title "Alias Input" --inputbox "Enter the alias you want to create:" 10 60 "lmt" 3>&1 1>&2 2>&3)
 
+if ! command -v whiptail &> /dev/null; then
+    echo "Whiptail is required. Would you like to install it now? (y/n)"
+    read -r answer
+
+    case "$answer" in
+        y|Y)
+            
+            if command -v apt-get &> /dev/null; then
+                sudo apt-get update
+                sudo apt-get install -y whiptail
+            elif command -v yum &> /dev/null; then
+                sudo yum install -y whiptail
+            elif command -v dnf &> /dev/null; then
+                sudo dnf install -y whiptail
+            elif command -v pacman &> /dev/null; then
+                sudo pacman -S --noconfirm whiptail
+            else
+                echo "Unsupported package manager. Please install whiptail manually and re-run the script."
+                exit 1
+            fi
+            ;;
+        n|N)
+            echo "Exiting now. To install Whiptail in the future, run the appropriate command for your package manager."
+            exit 1
+            ;;
+        *)
+            echo "Invalid input. Please enter 'y' to install or 'n' to exit."
+            exit 1
+            ;;
+    esac
+fi
+
+
 if [ $? -ne 0 ]; then
     echo "User canceled the operation."
     exit 1
@@ -51,4 +84,4 @@ else
     whiptail --title "Success" --msgbox "Alias added to $SHELL_CONFIG" 8 45
 fi
 
-whiptail --title "Instructions" --msgbox "To apply the changes, run:\n\nsource $SHELL_CONFIG" 12 45
+whiptail --title "Instructions" --msgbox "To apply the changes, run run exec bash or :\n\nsource $SHELL_CONFIG" 12 45

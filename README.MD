@@ -17,6 +17,9 @@ wget -qO LinuxMaintinanceTool.sh https://github.com/Sammeeeeeeee/Whiptail-Linux-
 
 # Add to path dynamicaly updating tool
 This tool adds an custom alias to your path (so you can run the script by typing `lmt`, or `LinuxMaintinanceTool`). Instead of downloading the script, it runs the script from the remote repo - meaning it will always run the latest update. 
+
+Append Sudo if not running as root. 
+
 ``` bash 
-bash -c "$(wget -qLO - https://github.com/Sammeeeeeeee/Whiptail-Linux-Maintenance-Wizard/raw/main/AddToPathDeploymentTool.sh)
+bash -c "$(wget -qLO - https://raw.githubusercontent.com/Sammeeeeeeee/Whiptail-Linux-Maintenance-Wizard/main/AddToPathDeploymentTool)"
 ```
