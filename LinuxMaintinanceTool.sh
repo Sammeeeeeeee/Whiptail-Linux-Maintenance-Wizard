@@ -1,10 +1,10 @@
 #!/bin/bash
 
 full_update() {
-    timeout 300 sudo apt update
-    timeout 300 sudo apt full-upgrade -y
-    timeout 300sudo apt autoremove --purge -y
-    timeout 300sudo snap refresh
+    timeout 300 apt update
+    timeout 300 apt full-upgrade -y
+    timeout 300 apt autoremove --purge -y
+    timeout 300 snap refresh
 }
 
 docker_update() {

@@ -11,12 +11,12 @@ This tool adds an custom alias to your path (so you can run the script by typing
 
 ### Run
 ``` bash 
-bash -c "$(wget -qLO - https://raw.githubusercontent.com/Sammeeeeeeee/Whiptail-Linux-Maintenance-Wizard/main/AddToPathDeploymentTool)"
+curl -s https://raw.githubusercontent.com/Sammeeeeeeee/Whiptail-Linux-Maintenance-Wizard/main/AddToPathDeploymentTool | bash -s
 ```
 
 ### Remove
 ``` bash 
-bash -c "$(wget -qO- https://raw.githubusercontent.com/Sammeeeeeeee/Whiptail-Linux-Maintenance-Wizard/main/AddToPathDeploymentTool -O -) -remove"
+curl -s https://raw.githubusercontent.com/Sammeeeeeeee/Whiptail-Linux-Maintenance-Wizard/main/AddToPathDeploymentTool | bash -s -- -remove
 ```
 
 ## Run from the repo:
