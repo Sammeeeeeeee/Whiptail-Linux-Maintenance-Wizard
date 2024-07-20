@@ -3,7 +3,45 @@
 SCRIPT_URL="https://github.com/Sammeeeeeeee/Whiptail-Linux-Maintenance-Wizard/raw/main/LinuxMaintinanceTool.sh"
 SCRIPT_PATH="/usr/local/bin/lmt.sh"
 
+if [ "$1" == "-remove" ]; then
+    if [ -e "$SCRIPT_PATH" ]; then
+        rm "$SCRIPT_PATH"
+        echo "Removed the script from $SCRIPT_PATH"
+    else
+        echo "The script is not installed at $SCRIPT_PATH"
+    fi
+
+    if [ -n "$SUDO_USER" ]; then
+        SHELL_CONFIG="/home/$SUDO_USER/.bashrc"
+    elif [ -n "$ZSH_VERSION" ]; then
+        SHELL_CONFIG="$HOME/.zshrc"
+    elif [ -n "$BASH_VERSION" ]; then
+        SHELL_CONFIG="$HOME/.bashrc"
+    else
+        echo "Unsupported shell. Please remove references manually."
+        exit 1
+    fi
+
+    if grep -q "lmt.sh" "$SHELL_CONFIG"; then
+        sed -i "/lmt.sh/d" "$SHELL_CONFIG"
+        echo "Removed references to lmt.sh from $SHELL_CONFIG"
+    else
+        echo "No references to lmt.sh found in $SHELL_CONFIG"
+    fi
+
+    if grep -q "lmt.sh" "$SHELL_CONFIG"; then
+        sed -i "/lmt.sh/d" "$SHELL_CONFIG"
+        echo "Removed any functions or commands referring to lmt.sh from $SHELL_CONFIG"
+    fi
+
+    exit 0
+fi
+
 SELECTED_ALIAS=$(whiptail --title "Alias Input" --inputbox "Enter the alias you want to create:" 10 60 "lmt" 3>&1 1>&2 2>&3)
+if [ $? -ne 0 ]; then
+    echo "User canceled the operation."
+    exit 1
+fi
 
 if ! command -v whiptail &> /dev/null; then
     echo "Whiptail is required. Would you like to install it now? (y/n)"
@@ -36,12 +74,7 @@ if ! command -v whiptail &> /dev/null; then
     esac
 fi
 
-if [ $? -ne 0 ]; then
-    echo "User canceled the operation."
-    exit 1
-fi
-
-if [[ -z "$SELECTED_ALIAS" ]]; then
+if [ -z "$SELECTED_ALIAS" ]; then
     whiptail --title "Error" --msgbox "Alias cannot be empty. Please run the script again." 8 45
     exit 1
 fi
@@ -53,7 +86,7 @@ DYNAMIC_LINK=$(whiptail --title "Choose Option" --menu "Select an option:" 12 12
 {
     whiptail --title "Progress" --gauge "Downloading and setting up the script..." 10 60 0 &
     
-    if [[ "$DYNAMIC_LINK" == "1" ]]; then
+    if [[ "$DYNAMIC_LINK" == "Dynamic Link:" ]]; then
         echo 'bash -c "$(wget -qLO - https://github.com/Sammeeeeeeee/Whiptail-Linux-Maintenance-Wizard/raw/main/LinuxMaintinanceTool.sh)"' > "$SCRIPT_PATH"
     else
         wget -qO "$SCRIPT_PATH" "$SCRIPT_URL"
@@ -72,9 +105,9 @@ DYNAMIC_LINK=$(whiptail --title "Choose Option" --menu "Select an option:" 12 12
     echo 100
 } | whiptail --title "Progress" --gauge "Setting up the script..." 10 60 0
 
-ALIAS_COMMAND="alias $SELECTED_ALIAS='$SCRIPT_PATH'"
-
-if [ -n "$ZSH_VERSION" ]; then
+if [ -n "$SUDO_USER" ]; then
+    SHELL_CONFIG="/home/$SUDO_USER/.bashrc"
+elif [ -n "$ZSH_VERSION" ]; then
     SHELL_CONFIG="$HOME/.zshrc"
 elif [ -n "$BASH_VERSION" ]; then
     SHELL_CONFIG="$HOME/.bashrc"
@@ -86,8 +119,8 @@ fi
 if grep -q "^alias $SELECTED_ALIAS=" "$SHELL_CONFIG"; then
     whiptail --title "Info" --msgbox "Alias already exists in $SHELL_CONFIG" 8 45
 else
-    echo "$ALIAS_COMMAND" >> "$SHELL_CONFIG"
+    echo "alias $SELECTED_ALIAS='$SCRIPT_PATH'" >> "$SHELL_CONFIG"
     whiptail --title "Success" --msgbox "Alias added to $SHELL_CONFIG" 8 45
 fi
 
-whiptail --title "Instructions" --msgbox "To apply the changes, run exec bash or:\n\nsource $SHELL_CONFIG" 12 45
+whiptail --title "Instructions" --msgbox "To apply the changes, run:\n\nsource $SHELL_CONFIG" 12 45

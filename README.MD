@@ -2,8 +2,6 @@
 
 A simple script that create a GUI using whiptail to help update and maintian linux servers. This works in the CLI, and should work over SSH.
 
-<<<<<<< Updated upstream
-=======
 # Run
 ## Use Deployment Tool (creates alias)
 This tool adds an custom alias to your path (so you can run the script by typing `lmt`, or `LinuxMaintinanceTool`, or anything else you want). It gives you the option of downloading the script, or running fresh everytime from the repo. 
@@ -21,25 +19,15 @@ curl -s https://raw.githubusercontent.com/Sammeeeeeeee/Whiptail-Linux-Maintenanc
 curl -s https://raw.githubusercontent.com/Sammeeeeeeee/Whiptail-Linux-Maintenance-Wizard/main/AddToPathDeploymentTool | bash -s -- -remove
 ```
 
->>>>>>> Stashed changes
 ## Run from the repo:
 ``` Bash
 bash -c "$(wget -qLO - https://github.com/Sammeeeeeeee/Whiptail-Linux-Maintenance-Wizard/raw/main/LinuxMaintinanceTool.sh)"
 ```
 
-## Run locally:
+## Download locally:
 ``` Bash
 wget -qO LinuxMaintinanceTool.sh https://github.com/Sammeeeeeeee/Whiptail-Linux-Maintenance-Wizard/raw/main/LinuxMaintinanceTool.sh
 ```
 ```
 ./LinuxMaintinanceTool.sh
-```
-
-# Add to path dynamicaly updating tool
-This tool adds an custom alias to your path (so you can run the script by typing `lmt`, or `LinuxMaintinanceTool`). Instead of downloading the script, it runs the script from the remote repo - meaning it will always run the latest update. 
-
-Append Sudo if not running as root. 
-
-``` bash 
-bash -c "$(wget -qLO - https://raw.githubusercontent.com/Sammeeeeeeee/Whiptail-Linux-Maintenance-Wizard/main/AddToPathDeploymentTool)"
 ```
