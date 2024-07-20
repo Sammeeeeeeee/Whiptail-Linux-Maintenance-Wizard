@@ -1,0 +1,54 @@
+#!/bin/bash
+
+SCRIPT_URL="https://github.com/Sammeeeeeeee/Whiptail-Linux-Maintenance-Wizard/raw/main/LinuxMaintinanceTool.sh"
+SCRIPT_PATH="/usr/local/bin/lmt.sh"
+
+SELECTED_ALIAS=$(whiptail --title "Alias Input" --inputbox "Enter the alias you want to create:" 10 60 "lmt" 3>&1 1>&2 2>&3)
+
+if [ $? -ne 0 ]; then
+    echo "User canceled the operation."
+    exit 1
+fi
+
+if [[ -z "$SELECTED_ALIAS" ]]; then
+    whiptail --title "Error" --msgbox "Alias cannot be empty. Please run the script again." 8 45
+    exit 1
+fi
+
+ALIAS_COMMAND="alias $SELECTED_ALIAS='$SCRIPT_PATH'"
+
+{
+    whiptail --title "Progress" --gauge "Downloading and setting up the script..." 10 60 0 &
+    
+    wget -qO "$SCRIPT_PATH" "$SCRIPT_URL"
+    if [ $? -ne 0 ]; then
+        whiptail --title "Error" --msgbox "Failed to download the script. Please check your internet connection or the URL." 8 45
+        exit 1
+    fi
+    
+    chmod +x "$SCRIPT_PATH"
+    if [ $? -ne 0 ]; then
+        whiptail --title "Error" --msgbox "Failed to set executable permissions on the script." 8 45
+        exit 1
+    fi
+
+    echo 100
+} | whiptail --title "Progress" --gauge "Setting up the script..." 10 60 0
+
+if [ -n "$ZSH_VERSION" ]; then
+    SHELL_CONFIG="$HOME/.zshrc"
+elif [ -n "$BASH_VERSION" ]; then
+    SHELL_CONFIG="$HOME/.bashrc"
+else
+    whiptail --title "Error" --msgbox "Unsupported shell. Please add the alias manually." 8 45
+    exit 1
+fi
+
+if grep -q "^alias $SELECTED_ALIAS=" "$SHELL_CONFIG"; then
+    whiptail --title "Info" --msgbox "Alias already exists in $SHELL_CONFIG" 8 45
+else
+    echo "$ALIAS_COMMAND" >> "$SHELL_CONFIG"
+    whiptail --title "Success" --msgbox "Alias added to $SHELL_CONFIG" 8 45
+fi
+
+whiptail --title "Instructions" --msgbox "To apply the changes, run:\n\nsource $SHELL_CONFIG" 12 45
