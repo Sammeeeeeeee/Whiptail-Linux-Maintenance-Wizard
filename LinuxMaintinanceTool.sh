@@ -1,15 +1,51 @@
 #!/bin/bash
 
 VERSION="1.0"
+SCRIPT_URL="https://raw.githubusercontent.com/Sammeeeeeeee/Whiptail-Linux-Maintenance-Wizard/main/LinuxMaintinanceTool.sh"
+SCRIPT_PATH="/usr/local/bin/lmt.sh"
 
 # Check for newer version
 check_version() {
-    local github_version=$(curl -s https://raw.githubusercontent.com/Sammeeeeeeee/Whiptail-Linux-Maintenance-Wizard/main/LinuxMaintinanceTool.sh | grep '^VERSION=' | cut -d '"' -f 2)
-    if [ -n "$github_version" ] && [ "$github_version" != "$VERSION" ]; then
-        whiptail --title "Update Available" --msgbox "A new version ($github_version) is available. You are currently running version $VERSION.\nPlease update your script." 10 60
+    echo "Checking for updates..."
+    local github_version=$(curl -s "$SCRIPT_URL" | grep '^VERSION=' | cut -d '"' -f 2)
+    echo "Current version: $VERSION"
+    echo "GitHub version: $github_version"
+    
+    if [ -z "$github_version" ]; then
+        whiptail --title "Update Check Failed" --msgbox "Failed to retrieve the latest version. Please check your internet connection and try again." 10 60
+        return
+    fi
+
+    if [ "$github_version" != "$VERSION" ]; then
+        update_choice=$(whiptail --title "Update Available" --menu "A new version ($github_version) is available. You are currently running version $VERSION. What would you like to do?" 15 60 2 \
+        "1" "Continue without updating" \
+        "2" "Update now" 3>&1 1>&2 2>&3)
+        
+        case $update_choice in
+            1)
+                return
+                ;;
+            2)
+                update_script
+                exit 0
+                ;;
+        esac
+    else
+        echo "You are running the latest version."
     fi
 }
 
+update_script() {
+    echo "Updating script..."
+    if curl -s "$SCRIPT_URL" > "$SCRIPT_PATH"; then
+        chmod +x "$SCRIPT_PATH"
+        whiptail --title "Update Successful" --msgbox "The script has been updated successfully. Please run it again." 10 60
+    else
+        whiptail --title "Update Failed" --msgbox "Failed to update the script. Please check your internet connection and try again." 10 60
+    fi
+}
+
+# Run the version check
 check_version
 
 full_update() {
