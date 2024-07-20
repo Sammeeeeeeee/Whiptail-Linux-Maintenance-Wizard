@@ -8,6 +8,7 @@ full_update() {
 }
 
 docker_update() {
+    docker run --name wathtower_docker-updater --rm -v /var/run/docker.sock:/var/run/docker.sock containrrr/watchtower:latest --run-once --cleanup --stop-timeout 60s --include-restarting --include-stopped
 }
 
 disk_usage() {
@@ -84,3 +85,4 @@ for choice in $INFO_CHOICES; do
     esac
 done
 
+exit 0
