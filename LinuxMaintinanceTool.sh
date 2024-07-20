@@ -8,7 +8,7 @@ full_update() {
 }
 
 docker_update() {
-    docker run --name watchtower-run_once --rm -v /var/run/docker.sock:/var/run/docker.sock containrrr/watchtower:latest --run-once --cleanup --stop-timeout 60s --include-restarting --include-stopped
+    docker run --name wathtower_docker-updater --rm -v /var/run/docker.sock:/var/run/docker.sock containrrr/watchtower:latest --run-once --cleanup --stop-timeout 60s --include-restarting --include-stopped
 }
 
 disk_usage() {
