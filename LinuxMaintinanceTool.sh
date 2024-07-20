@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION="4.2"
+VERSION="5.1"
 SCRIPT_URL="https://raw.githubusercontent.com/Sammeeeeeeee/Whiptail-Linux-Maintenance-Wizard/main/LinuxMaintinanceTool.sh"
 SCRIPT_PATH="/usr/local/bin/lmt.sh"
 
@@ -10,7 +10,6 @@ if ! command -v whiptail &> /dev/null; then
     echo "https://github.com/Sammeeeeeeee/Whiptail-Linux-Maintenance-Wizard/tree/main#run"
     exit 1
 fi
-
 
 check_version() {
     local github_version=$(curl -s "$SCRIPT_URL" | grep '^VERSION=' | cut -d '"' -f 2)
@@ -37,7 +36,6 @@ check_version() {
         esac
     fi
 }
-
 
 update_script() {
     echo "Updating..."
@@ -99,10 +97,12 @@ fi
 for choice in $UPDATE_CHOICES; do
     case $choice in
         "1")
+            echo "$(date): Running Full System Update"
             output=$(full_update 2>&1)
             whiptail --title "Full System Update"  --msgbox "$output" 20 80
             ;;
         "2")
+            echo "$(date): Running Docker Update (Watchtower)"
             output=$(docker_update 2>&1)
             whiptail --title "Docker Update (Watchtower)" --msgbox "$output" 20 80
             ;;
@@ -112,18 +112,22 @@ done
 for choice in $INFO_CHOICES; do
     case $choice in
         "1")
+            echo "$(date): Running Disk Usage Check"
             output=$(disk_usage 2>&1)
             whiptail --title "Disk Usage Check" --msgbox "$output" 20 80
             ;;
         "2")
+            echo "$(date): Running Docker Container Status Check"
             output=$(docker_status 2>&1)
             whiptail --title "Docker Container Status" --msgbox "$output" 20 80
             ;;
         "3")
+            echo "$(date): Running Memory Free Average Check"
             output=$(memory_free_average 2>&1)
             whiptail --title "Memory Free Average" --msgbox "$output" 20 80
             ;;
         "4")
+            echo "$(date): Running Top Processes Average Check"
             output=$(top_processes_average 2>&1)
             whiptail --title "Top Processes Average" --msgbox "$output" 20 80
             ;;
