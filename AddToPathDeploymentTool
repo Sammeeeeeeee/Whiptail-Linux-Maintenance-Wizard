@@ -3,9 +3,39 @@
 SCRIPT_URL="https://github.com/Sammeeeeeeee/Whiptail-Linux-Maintenance-Wizard/raw/main/LinuxMaintinanceTool.sh"
 SCRIPT_PATH="/usr/local/bin/lmt.sh"
 
-if [ "$1" == "-remove" ]; then
+# Cleanup function
+cleanup() {
+    echo "Cleaning up..."
+    [ -e "$SCRIPT_PATH" ] && rm "$SCRIPT_PATH"
+    # Revert any other changes made during installation
+}
+
+trap cleanup EXIT
+
+# Function to handle installation and removal
+install_script() {
+    if [[ "$DYNAMIC_LINK" == "Dynamic Link:" ]]; then
+        echo 'bash -c "$(wget -qLO - https://github.com/Sammeeeeeeee/Whiptail-Linux-Maintenance-Wizard/raw/main/LinuxMaintinanceTool.sh)"' > "$SCRIPT_PATH"
+        echo "Created $SCRIPT_PATH"
+    else
+        if ! download_with_retry "$SCRIPT_URL" "$SCRIPT_PATH"; then
+            whiptail --title "Error" --msgbox "Failed to download the script after multiple attempts. Please check your internet connection or the URL." 10 60
+            exit 1
+        fi
+    fi
+
+    chmod +x "$SCRIPT_PATH"
+    echo "Setting permissions..."
+    if [ $? -ne 0 ]; then
+        whiptail --title "Error" --msgbox "Failed to set executable permissions on the script." 8 45
+        exit 1
+    fi
+}
+
+# Function to handle removal of script and alias
+remove_script() {
     if [ -e "$SCRIPT_PATH" ]; then
-        sudo rm "$SCRIPT_PATH"
+        rm "$SCRIPT_PATH"
         echo "Removed the script from $SCRIPT_PATH"
     else
         echo "The script is not installed at $SCRIPT_PATH"
@@ -28,21 +58,40 @@ if [ "$1" == "-remove" ]; then
     else
         echo "No references to lmt.sh found in $SHELL_CONFIG"
     fi
+}
 
-    if grep -q "lmt.sh" "$SHELL_CONFIG"; then
-        sed -i "/lmt.sh/d" "$SHELL_CONFIG"
-        echo "Removed any functions or commands referring to lmt.sh from $SHELL_CONFIG"
-    fi
+# Function to download with retry
+download_with_retry() {
+    local url=$1
+    local output=$2
+    local max_attempts=3
+    local attempt=1
 
-    exit 0
-fi
+    while [ $attempt -le $max_attempts ]; do
+        if wget --timeout=30 -qO "$output" "$url"; then
+            return 0
+        fi
+        attempt=$((attempt + 1))
+        echo "Download failed. Retrying in 5 seconds..."
+        sleep 5
+    done
 
-SELECTED_ALIAS=$(whiptail --title "Alias Input" --inputbox "Enter the alias you want to create:" 10 60 "lmt" 3>&1 1>&2 2>&3)
-if [ $? -ne 0 ]; then
-    echo "User canceled the operation."
+    return 1
+}
+
+# Ensure script is run as root
+if [ "$(id -u)" -ne 0 ]; then
+    echo "This script must be run as root. Please use sudo or log in as root."
     exit 1
 fi
 
+# Handle removal
+if [ "$1" == "-remove" ]; then
+    remove_script
+    exit 0
+fi
+
+# Check for whiptail
 if ! command -v whiptail &> /dev/null; then
     echo "Whiptail is required. Would you like to install it now? (y/n)"
     read -r answer
@@ -50,14 +99,14 @@ if ! command -v whiptail &> /dev/null; then
     case "$answer" in
         y|Y)
             if command -v apt-get &> /dev/null; then
-                sudo apt-get update
-                sudo apt-get install -y whiptail
+                apt-get update
+                apt-get install -y whiptail
             elif command -v yum &> /dev/null; then
-                sudo yum install -y whiptail
+                yum install -y whiptail
             elif command -v dnf &> /dev/null; then
-                sudo dnf install -y whiptail
+                dnf install -y whiptail
             elif command -v pacman &> /dev/null; then
-                sudo pacman -S --noconfirm whiptail
+                pacman -S --noconfirm whiptail
             else
                 echo "Unsupported package manager. Please install whiptail manually and re-run the script."
                 exit 1
@@ -74,45 +123,47 @@ if ! command -v whiptail &> /dev/null; then
     esac
 fi
 
-if [ -z "$SELECTED_ALIAS" ]; then
-    whiptail --title "Error" --msgbox "Alias cannot be empty. Please run the script again." 8 45
+# Prompt for alias
+SELECTED_ALIAS=$(whiptail --title "Alias Input" --inputbox "Enter the alias you want to create:" 10 60 "lmt" 3>&1 1>&2 2>&3)
+if [ $? -ne 0 ]; then
+    echo "User canceled the operation."
     exit 1
 fi
 
+# Validate alias input
+if [ -z "$SELECTED_ALIAS" ]; then
+    whiptail --title "Error" --msgbox "Alias cannot be empty. Please run the script again." 8 45
+    echo "Alias not accepted"
+    exit 1
+fi
+
+# Choose link option
 DYNAMIC_LINK=$(whiptail --title "Choose Option" --menu "Select an option:" 12 120 2 \
 "Dynamic Link:" "Runs the version fresh off the GitHub repo every time. Unsecure, but always has the latest edition" \
 "Download:" "Download the latest version from the GitHub repo. Will not auto-update." 3>&1 1>&2 2>&3)
 
+# Download and set up the script
 {
     whiptail --title "Progress" --gauge "Downloading and setting up the script..." 10 60 0 &
     
-    if [[ "$DYNAMIC_LINK" == "Dynamic Link:" ]]; then
-        sudo echo 'bash -c "$(wget -qLO - https://github.com/Sammeeeeeeee/Whiptail-Linux-Maintenance-Wizard/raw/main/LinuxMaintinanceTool.sh)"' > "$SCRIPT_PATH"
-    else
-        sudo wget -qO "$SCRIPT_PATH" "$SCRIPT_URL"
-        if [ $? -ne 0 ]; then
-            whiptail --title "Error" --msgbox "Failed to download the script. Please check your internet connection or the URL." 8 45
-            exit 1
-        fi
-    fi
-    
-    chmod +x "$SCRIPT_PATH"
-    if [ $? -ne 0 ]; then
-        whiptail --title "Error" --msgbox "Failed to set executable permissions on the script." 8 45
-        exit 1
-    fi
+    install_script
 
     echo 100
 } | whiptail --title "Progress" --gauge "Setting up the script..." 10 60 0
 
+# Update shell configuration
 if [ -n "$SUDO_USER" ]; then
     SHELL_CONFIG="/home/$SUDO_USER/.bashrc"
+    echo "Adding path alias"
 elif [ -n "$ZSH_VERSION" ]; then
     SHELL_CONFIG="$HOME/.zshrc"
+    echo "Adding path alias"
 elif [ -n "$BASH_VERSION" ]; then
     SHELL_CONFIG="$HOME/.bashrc"
+    echo "Adding path alias"
 else
     whiptail --title "Error" --msgbox "Unsupported shell. Please add the alias manually." 8 45
+    echo "Unsupported shell. Couldn't add alias"
     exit 1
 fi
 
@@ -120,7 +171,11 @@ if grep -q "^alias $SELECTED_ALIAS=" "$SHELL_CONFIG"; then
     whiptail --title "Info" --msgbox "Alias already exists in $SHELL_CONFIG" 8 45
 else
     echo "alias $SELECTED_ALIAS='$SCRIPT_PATH'" >> "$SHELL_CONFIG"
+    if [ $? -ne 0 ]; then
+        whiptail --title "Error" --msgbox "Failed to add alias to $SHELL_CONFIG. Please add it manually." 8 60
+        exit 1
+    fi
     whiptail --title "Success" --msgbox "Alias added to $SHELL_CONFIG" 8 45
 fi
 
-whiptail --title "Instructions" --msgbox "To apply the changes, run:\n\nsource $SHELL_CONFIG" 12 45
+whiptail --title "Instructions" --msgbox "To apply the changes,  start a new session or run:\n\nsource $SHELL_CONFIG" 12 45
