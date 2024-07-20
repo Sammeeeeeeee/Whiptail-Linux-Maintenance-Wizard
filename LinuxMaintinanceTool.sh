@@ -1,14 +1,16 @@
 #!/bin/bash
 
-VERSION="2.0"
+VERSION="3.0"
 SCRIPT_URL="https://raw.githubusercontent.com/Sammeeeeeeee/Whiptail-Linux-Maintenance-Wizard/main/LinuxMaintinanceTool.sh"
 SCRIPT_PATH="/usr/local/bin/lmt.sh"
 
 if ! command -v whiptail &> /dev/null; then
-    echo "Whiptail is required."
-    echo "Install whiptail, or run the deployment tool at https://github.com/Sammeeeeeeee/Whiptail-Linux-Maintenance-Wizard/tree/main#run"
-    exit 0
+    echo "Error: Whiptail is required but not installed."
+    echo "Please install whiptail or visit the following link for instructions:"
+    echo "https://github.com/Sammeeeeeeee/Whiptail-Linux-Maintenance-Wizard/tree/main#run"
+    exit 1
 fi
+
 
 check_version() {
     local github_version=$(curl -s "$SCRIPT_URL" | grep '^VERSION=' | cut -d '"' -f 2)
@@ -33,10 +35,9 @@ check_version() {
                 exit 0
                 ;;
         esac
-    else
-
     fi
 }
+
 
 update_script() {
     echo "Updating..."
