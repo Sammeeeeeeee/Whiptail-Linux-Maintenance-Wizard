@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION="5.1"
+VERSION="5.2"
 SCRIPT_URL="https://raw.githubusercontent.com/Sammeeeeeeee/Whiptail-Linux-Maintenance-Wizard/main/LinuxMaintinanceTool.sh"
 SCRIPT_PATH="/usr/local/bin/lmt.sh"
 
@@ -49,14 +49,14 @@ update_script() {
 check_version
 
 full_update() {
-    timeout 300 apt update
-    timeout 300 apt full-upgrade -y
-    timeout 300 apt autoremove --purge -y
+    timeout 300 apt-get update
+    timeout 300 apt-get dist-upgrade -y
+    timeout 300 apt-get autoremove --purge -y
     timeout 300 snap refresh
 }
 
 docker_update() {
-    timeout 3000 docker run --name wathtower_docker-updater --rm -v /var/run/docker.sock:/var/run/docker.sock containrrr/watchtower:latest --run-once --cleanup --stop-timeout 60s --include-restarting --include-stopped
+    timeout 3000 docker run --name wathtower_docker-updater_LinuxMaintinanceTool --rm -v /var/run/docker.sock:/var/run/docker.sock containrrr/watchtower:latest --run-once --cleanup --stop-timeout 60s --include-restarting --include-stopped
 }
 
 disk_usage() {
