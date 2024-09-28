@@ -1,12 +1,12 @@
 #!/bin/bash
 
-VERSION="5.1"
+VERSION="5.3"
 SCRIPT_URL="https://raw.githubusercontent.com/Sammeeeeeeee/Whiptail-Linux-Maintenance-Wizard/main/LinuxMaintinanceTool.sh"
 SCRIPT_PATH="/usr/local/bin/lmt.sh"
 
 if ! command -v whiptail &> /dev/null; then
     echo "Error: Whiptail is required but not installed."
-    echo "Please install whiptail or visit the following link for instructions:"
+    echo "Please install whiptail (apt install whiptail) or visit the following link for instructions:"
     echo "https://github.com/Sammeeeeeeee/Whiptail-Linux-Maintenance-Wizard/tree/main#run"
     exit 1
 fi
@@ -72,7 +72,7 @@ memory_free_average() {
 }
 
 top_processes_average() {
-    timeout 30 ps -eo pid,ppid,cmd,%mem,%cpu --sort=-%cpu | head -n 6
+    timeout 30 ps -eo pid,ppid,cmd,%mem,%cpu --sort=-%cpu | head -n 10
 }
 
 UPDATE_CHOICES=$(whiptail --title "Select Update Options" --separate-output --checklist \
